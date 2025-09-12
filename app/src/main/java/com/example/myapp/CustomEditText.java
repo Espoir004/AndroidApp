@@ -28,7 +28,7 @@ public class CustomEditText extends AppCompatEditText {
         setTextColor(ContextCompat.getColor(getContext(), R.color.black));
         setHintTextColor(ContextCompat.getColor(getContext(), R.color.gray));
 
-        // 设置焦点变化监听
+        // 焦点变化监听
         setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
