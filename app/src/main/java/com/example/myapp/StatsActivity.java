@@ -1,6 +1,7 @@
 package com.example.myapp;
 
 import android.os.Bundle;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,14 @@ public class StatsActivity extends AppCompatActivity {
         barChartView = findViewById(R.id.barChartView);
         dbHelper = new DatabaseHelper(this);
 
-        // 假设用户ID为1
-        int userId = 1;
+        // 获取从上一个活动传递过来的用户ID
+        int userId = getIntent().getIntExtra("user_id", -1);
+
+        if (userId == -1) {
+            Toast.makeText(this, "用户信息错误", Toast.LENGTH_SHORT).show(); // 修正拼写错误
+            finish();
+            return;
+        }
 
         // 获取最近7天的计划数量
         Map<String, Integer> planCounts = dbHelper.getPlanCountsLastNDays(userId, 7);

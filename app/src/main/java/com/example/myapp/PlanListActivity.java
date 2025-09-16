@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-// 添加必要的导入
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
@@ -30,6 +29,7 @@ public class PlanListActivity extends AppCompatActivity {
     private List<Plan> planList;
     private PlanAdapter adapter;
     private String username;
+    private int userId; // 添加用户ID字段
     private Uri avatarUri;
 
     @Override
@@ -40,6 +40,7 @@ public class PlanListActivity extends AppCompatActivity {
         // 获取传递的数据
         Intent intent = getIntent();
         username = intent.getStringExtra("username");
+        userId = intent.getIntExtra("user_id", -1); // 获取用户ID
         String avatarStr = intent.getStringExtra("avatar");
         if (avatarStr != null) {
             avatarUri = Uri.parse(avatarStr);
@@ -61,6 +62,13 @@ public class PlanListActivity extends AppCompatActivity {
         // 初始化数据库
         dbHelper = new DatabaseHelper(this);
 
+        // 检查用户ID是否有效
+        if (userId == -1) {
+            Toast.makeText(this, "用户信息错误", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         // 加载计划列表
         loadPlans();
 
@@ -78,6 +86,7 @@ public class PlanListActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent statsIntent = new Intent(PlanListActivity.this, StatsActivity.class);
                 statsIntent.putExtra("username", username);
+                statsIntent.putExtra("user_id", userId); // 传递用户ID
                 startActivity(statsIntent);
             }
         });
@@ -94,8 +103,6 @@ public class PlanListActivity extends AppCompatActivity {
     }
 
     private void loadPlans() {
-        // 假设用户ID为1（实际应用中应该根据登录用户获取）
-        int userId = 1;
         planList = dbHelper.getAllPlans(userId);
         adapter = new PlanAdapter(this, planList);
         lvPlans.setAdapter(adapter);
@@ -159,8 +166,8 @@ public class PlanListActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 假设用户ID为1
-                Plan plan = new Plan(title, description, date, 1);
+                // 使用当前登录用户的ID
+                Plan plan = new Plan(title, description, date, userId);
                 dbHelper.addPlan(plan);
                 loadPlans();
                 dialog.dismiss();

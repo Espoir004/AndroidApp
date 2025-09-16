@@ -16,7 +16,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
     private ImageView imageView;
     private CustomEditText etUsername, etPassword;
-    private Button btnLogin, btnSelectAvatar, btnRegister; // 添加注册按钮引用
+    private Button btnLogin, btnSelectAvatar, btnRegister;
     private ProgressBar progressBar;
     private DatabaseHelper dbHelper;
     private Uri avatarUri;
@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnSelectAvatar = findViewById(R.id.btnSelectAvatar);
-        btnRegister = findViewById(R.id.btnRegister); // 初始化注册按钮
+        btnRegister = findViewById(R.id.btnRegister);
         progressBar = findViewById(R.id.progressBar);
 
         // 初始化数据库
@@ -93,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
         // 显示进度条
         progressBar.setVisibility(View.VISIBLE);
         btnLogin.setEnabled(false);
-        btnRegister.setEnabled(false); // 禁用注册按钮
+        btnRegister.setEnabled(false);
 
         // 模拟登录过程
         new Handler().postDelayed(new Runnable() {
@@ -102,13 +102,18 @@ public class LoginActivity extends AppCompatActivity {
                 boolean isValid = dbHelper.checkUser(username, password);
                 progressBar.setVisibility(View.GONE);
                 btnLogin.setEnabled(true);
-                btnRegister.setEnabled(true); // 重新启用注册按钮
+                btnRegister.setEnabled(true);
 
                 if (isValid) {
                     Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
+
+                    // 获取用户ID
+                    int userId = dbHelper.getUserId(username);
+
                     // 跳转到计划列表页面
                     Intent intent = new Intent(LoginActivity.this, PlanListActivity.class);
                     intent.putExtra("username", username);
+                    intent.putExtra("user_id", userId); // 传递用户ID
                     if (avatarUri != null) {
                         intent.putExtra("avatar", avatarUri.toString());
                     }

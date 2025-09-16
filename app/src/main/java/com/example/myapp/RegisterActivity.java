@@ -93,7 +93,18 @@ public class RegisterActivity extends AppCompatActivity {
 
         if (success) {
             Toast.makeText(this, "注册成功", Toast.LENGTH_SHORT).show();
-            finish(); // 返回登录界面
+
+            // 注册成功后自动登录
+            int userId = dbHelper.getUserId(username);
+
+            Intent intent = new Intent(RegisterActivity.this, PlanListActivity.class);
+            intent.putExtra("username", username);
+            intent.putExtra("user_id", userId);
+            if (avatarUri != null) {
+                intent.putExtra("avatar", avatarUri.toString());
+            }
+            startActivity(intent);
+            finish();
         } else {
             Toast.makeText(this, "注册失败", Toast.LENGTH_SHORT).show();
         }
