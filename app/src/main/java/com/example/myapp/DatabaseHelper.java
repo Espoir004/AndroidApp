@@ -5,8 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "PlanApp.db";
@@ -202,41 +208,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * 获取最近7天的计划统计
+     * 获取最近N天的计划数量统计
      */
-    public List<Integer> getLast7DaysPlanCounts(int userId) {
-        List<Integer> counts = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
+    public Map<String, Integer> getPlanCountsLastNDays(int userId, int days) {
+        Map<String, Integer> result = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-        // 获取最近7天的日期
-        List<String> dates = getLast7Days();
-
-        for (String date : dates) {
-            Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_PLANS + " WHERE " +
-                            COLUMN_PLAN_DATE + " = ? AND " + COLUMN_PLAN_USER_ID + " = ?",
-                    new String[]{date, String.valueOf(userId)});
-            cursor.moveToFirst();
-            counts.add(cursor.getInt(0));
-            cursor.close();
+        // 获取最近N天的日期
+        for (int i = days - 1; i >= 0; i--) {
+            Calendar day = Calendar.getInstance();
+            day.add(Calendar.DAY_OF_YEAR, -i);
+            String date = sdf.format(day.getTime());
+            int count = getPlansCountByDate(date, userId);
+            result.put(date, count);
         }
 
-        return counts;
+        return result;
     }
 
     /**
      * 获取最近7天的日期列表
      */
-    private List<String> getLast7Days() {
-        // 这里应该返回最近7天的日期列表
-        // 为了简化，我们返回一些示例日期
+    public List<String> getLast7Days() {
         List<String> dates = new ArrayList<>();
-        dates.add("2023-10-01");
-        dates.add("2023-10-02");
-        dates.add("2023-10-03");
-        dates.add("2023-10-04");
-        dates.add("2023-10-05");
-        dates.add("2023-10-06");
-        dates.add("2023-10-07");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        for (int i = 6; i >= 0; i--) {
+            Calendar day = Calendar.getInstance();
+            day.add(Calendar.DAY_OF_YEAR, -i);
+            dates.add(sdf.format(day.getTime()));
+        }
+
         return dates;
     }
 
