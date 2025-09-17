@@ -3,23 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="32dp"
     android:gravity="center"
-    android:background="@color/app_background">
+    android:background="@color/surface">
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginBottom="32dp"
         android:src="@drawable/default_avatar"
-        android:contentDescription="选择头像" />
+        android:contentDescription="选择头像"
+        android:background="@drawable/circle_bg" />
 
     <Button
         android:id="@+id/btnSelectAvatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:text="选择头像" />
+        android:text="选择头像"
+        style="@style/ButtonSecondary" />
 
     <com.example.myapp.CustomEditText
         android:id="@+id/etUsername"
@@ -49,6 +52,6 @@
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="注册" />
-
+        android:text="注册"
+        style="@style/ButtonPrimary" />
 </LinearLayout>

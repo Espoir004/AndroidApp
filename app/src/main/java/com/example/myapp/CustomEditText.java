@@ -25,8 +25,10 @@ public class CustomEditText extends AppCompatEditText {
     private void init() {
         // 设置背景和样式
         setBackgroundResource(R.drawable.edittext_border);
-        setTextColor(ContextCompat.getColor(getContext(), R.color.black));
-        setHintTextColor(ContextCompat.getColor(getContext(), R.color.gray));
+        setTextColor(ContextCompat.getColor(getContext(), R.color.gray_900));
+        setHintTextColor(ContextCompat.getColor(getContext(), R.color.gray_500));
+        setTextSize(16);
+        setPadding(16, 16, 16, 16);
 
         // 焦点变化监听
         setOnFocusChangeListener(new OnFocusChangeListener() {

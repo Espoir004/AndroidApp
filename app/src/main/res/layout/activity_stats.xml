@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/app_background"
+    android:padding="24dp"
+    android:background="@color/surface"
     tools:ignore="ExtraText">
 
     <TextView
@@ -15,11 +15,14 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_marginBottom="16dp" />
+        android:textColor="@color/on_surface"
+        android:layout_marginBottom="24dp" />
 
     <com.example.myapp.CustomBarChartView
         android:id="@+id/barChartView"
         android:layout_width="match_parent"
-        android:layout_height="300dp" />
+        android:layout_height="300dp"
+        android:background="@color/white"
+        android:elevation="2dp" />
 
 </LinearLayout>

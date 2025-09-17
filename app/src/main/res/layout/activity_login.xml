@@ -4,24 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center">
-    android:background="@color/app_background">
+    android:padding="32dp"
+    android:gravity="center"
+    android:background="@color/surface">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="98dp"
-        android:layout_height="98dp"
-        android:layout_marginBottom="32dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="40dp"
         android:contentDescription="@string/select_avatar"
-        android:src="@drawable/default_avatar" />
+        android:src="@drawable/default_avatar"
+        android:background="@drawable/circle_bg"
+        android:padding="8dp"/>
 
     <Button
         android:id="@+id/btnSelectAvatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:text="@string/select_avatar" />
+        android:text="@string/select_avatar"
+        android:textSize="16sp"
+        android:minWidth="120dp"
+        android:minHeight="48dp"
+        style="@style/ButtonSecondary" />
 
     <com.example.myapp.CustomEditText
         android:id="@+id/etUsername"
@@ -49,15 +55,20 @@
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="@string/login_button"
-        style="@style/Widget.AppCompat.Button.Colored" />
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:background="@drawable/button_primary_bg"
+        android:textColor="@color/white" />
 
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_marginTop="16dp"
-        android:text="注册新账号"
-        style="@style/Widget.AppCompat.Button.Borderless" />
+        android:text="@string/register_button"
+        android:textSize="16sp"
+        android:background="@drawable/button_secondary_bg"
+        android:textColor="@color/primary" />
 </LinearLayout>

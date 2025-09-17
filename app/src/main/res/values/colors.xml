@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 基础颜色 -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- 灰色调色板 -->
+    <color name="gray_50">#FFFAFAFA</color>
+    <color name="gray_100">#FFF5F5F5</color>
+    <color name="gray_200">#FFEEEEEE</color>
+    <color name="gray_300">#FFE0E0E0</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_500">#FF9E9E9E</color>
+    <color name="gray_600">#FF757575</color>
+    <color name="gray_700">#FF616161</color>
+    <color name="gray_800">#FF424242</color>
+    <color name="gray_900">#FF212121</color>
+
+    <!-- 应用特定颜色 -->
+    <color name="surface">@color/gray_50</color>
+    <color name="on_surface">@color/gray_900</color>
+    <color name="primary">#FF2C2C2C</color>  <!-- 更深的灰色，确保对比度 -->
+    <color name="primary_dark">@color/black</color>
+    <color name="secondary">@color/gray_600</color>
+
+    <!-- 保留原有颜色（避免编译错误） -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="gray">#FF888888</color>
-    <color name="primary">#3F51B5</color>
-    <color name="primary_dark">#303F9F</color>
     <color name="accent">#FF4081</color>
-    <color name="app_background">#F5F5F5</color>
+    <color name="app_background">@color/gray_100</color>
 </resources>

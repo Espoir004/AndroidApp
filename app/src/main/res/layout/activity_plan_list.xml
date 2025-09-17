@@ -4,44 +4,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/app_background">
+    android:background="@color/surface">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="?attr/colorPrimary">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:elevation="4dp">
 
         <ImageView
             android:id="@+id/ivAvatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/default_avatar" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/default_avatar"
+            android:background="@drawable/circle_bg" />
 
         <TextView
             android:id="@+id/tvUsername"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginStart="16dp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/on_surface"
             android:textSize="18sp"
             android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnStats"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_gravity="end"
-            android:text="@string/show_stats" />
-
+            android:layout_height="32dp"
+            android:text="@string/show_stats"
+            style="@style/ButtonSecondary"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <ListView
         android:id="@+id/lvPlans"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:divider="@color/gray_200"
+        android:dividerHeight="1dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
@@ -50,6 +57,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@drawable/ic_add"
-        app:backgroundTint="@color/primary" />
-
+        app:backgroundTint="@color/primary"
+        app:tint="@color/white" />
 </LinearLayout>
