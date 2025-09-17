@@ -3,39 +3,49 @@ package com.example.myapp;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import androidx.recyclerview.widget.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class StatsActivity extends AppCompatActivity {
-    private CustomBarChartView barChartView;
     private DatabaseHelper dbHelper;
+    private DateStatsAdapter adapter;
+    private RecyclerView recyclerView;
+    private LinearLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_stats);
+        recyclerView = new RecyclerView(this);
+        setContentView(recyclerView);
 
-        barChartView = findViewById(R.id.barChartView);
         dbHelper = new DatabaseHelper(this);
-
-        // 获取从上一个活动传递过来的用户ID
         int userId = getIntent().getIntExtra("user_id", -1);
-
         if (userId == -1) {
-            Toast.makeText(this, "用户信息错误", Toast.LENGTH_SHORT).show(); // 修正拼写错误
+            Toast.makeText(this, "用户信息错误", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // 获取最近7天的计划数量
-        Map<String, Integer> planCounts = dbHelper.getPlanCountsLastNDays(userId, 7);
+        /* 构造连续 31 天：今天前后各 15 天 */
+        List<String> dates = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, -15);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        for (int i = 0; i < 31; i++) {
+            String date = sdf.format(cal.getTime());
+            dates.add(date);
+            counts.add(dbHelper.getPlansCountByDate(date, userId));
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+        }
 
-        // 提取日期和数量
-        List<String> dates = new ArrayList<>(planCounts.keySet());
-        List<Integer> counts = new ArrayList<>(planCounts.values());
+        adapter = new DateStatsAdapter(dates, counts);
+        layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
 
-        // 设置图表数据
-        barChartView.setData(dates, counts);
+        /* 滚动到“今天”位置 */
+        recyclerView.scrollToPosition(15);
     }
 }

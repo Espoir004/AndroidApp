@@ -193,19 +193,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    /**
-     * 按日期统计计划数量
-     */
-    public int getPlansCountByDate(String date, int userId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_PLANS + " WHERE " +
-                        COLUMN_PLAN_DATE + " = ? AND " + COLUMN_PLAN_USER_ID + " = ?",
-                new String[]{date, String.valueOf(userId)});
-        cursor.moveToFirst();
-        int count = cursor.getInt(0);
-        cursor.close();
-        return count;
-    }
 
     /**
      * 获取最近N天的计划数量统计
@@ -240,6 +227,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return dates;
+    }
+
+    /**
+     * 获取用户所有计划中涉及的唯一日期，并按升序排列
+     */
+    public List<String> getAllPlanDates(int userId) {
+        List<String> dates = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT DISTINCT " + COLUMN_PLAN_DATE +
+                " FROM " + TABLE_PLANS +
+                " WHERE " + COLUMN_PLAN_USER_ID + " = ?" +
+                " ORDER BY " + COLUMN_PLAN_DATE + " ASC", new String[]{String.valueOf(userId)});
+
+        while (cursor.moveToNext()) {
+            dates.add(cursor.getString(0));
+        }
+        cursor.close();
+        return dates;
+    }
+
+    /**
+     * 获取指定日期的计划数量
+     */
+    public int getPlansCountByDate(String date, int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_PLANS +
+                        " WHERE " + COLUMN_PLAN_DATE + " = ? AND " + COLUMN_PLAN_USER_ID + " = ?",
+                new String[]{date, String.valueOf(userId)});
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+        cursor.close();
+        return count;
     }
 
     /**

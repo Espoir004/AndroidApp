@@ -43,7 +43,7 @@
             android:layout_weight="1"
             android:text="未选择"
             android:textSize="16sp"
-            android:textColor="@color/primary" />
+            android:textColor="@color/teal_200" />
 
         <Button
             android:id="@+id/btnSelectDate"

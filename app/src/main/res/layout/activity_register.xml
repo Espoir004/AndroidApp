@@ -11,7 +11,7 @@
         android:id="@+id/imageView"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/default_avatar"
         android:contentDescription="选择头像"
         android:background="@drawable/circle_bg" />
@@ -22,6 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:text="选择头像"
+        android:textSize="18sp"
         style="@style/ButtonSecondary" />
 
     <com.example.myapp.CustomEditText
@@ -53,5 +54,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="注册"
-        style="@style/ButtonPrimary" />
+        android:textColor="@color/black"/>
 </LinearLayout>
