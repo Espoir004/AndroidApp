@@ -16,8 +16,8 @@ public class StatsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        recyclerView = new RecyclerView(this);
-        setContentView(recyclerView);
+        setContentView(R.layout.activity_stats);
+        recyclerView = findViewById(R.id.recyclerView);
 
         dbHelper = new DatabaseHelper(this);
         int userId = getIntent().getIntExtra("user_id", -1);

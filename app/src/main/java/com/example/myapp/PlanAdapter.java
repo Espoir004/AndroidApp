@@ -6,45 +6,38 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
 import java.util.List;
 
 public class PlanAdapter extends ArrayAdapter<Plan> {
-    private int resourceId;
-
-    public PlanAdapter(Context context, int textViewResourceId, List<Plan> objects) {
-        super(context, textViewResourceId, objects);
-        resourceId = textViewResourceId;
-    }
 
     public PlanAdapter(Context context, List<Plan> objects) {
-        this(context, android.R.layout.simple_list_item_2, objects);
+        super(context, android.R.layout.simple_list_item_2, objects);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Plan plan = getItem(position);
-        View view;
-        ViewHolder viewHolder;
-
         if (convertView == null) {
-            view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
-            viewHolder = new ViewHolder();
-            viewHolder.tvTitle = view.findViewById(android.R.id.text1);
-            viewHolder.tvDate = view.findViewById(android.R.id.text2);
-            view.setTag(viewHolder);
-        } else {
-            view = convertView;
-            viewHolder = (ViewHolder) view.getTag();
+            convertView = LayoutInflater.from(getContext())
+                    .inflate(android.R.layout.simple_list_item_2, parent, false);
         }
 
-        viewHolder.tvTitle.setText(plan.getTitle());
-        viewHolder.tvDate.setText(plan.getDate() + " - " + plan.getDescription());
+        TextView tvTitle = convertView.findViewById(android.R.id.text1);
+        TextView tvSub   = convertView.findViewById(android.R.id.text2);
 
-        return view;
-    }
+        // 第一行：标题
+        tvTitle.setText(plan.getTitle());
 
-    class ViewHolder {
-        TextView tvTitle;
-        TextView tvDate;
+        // 第二行：日期 + 描述 + 温度 + 节假日（一行显示）
+        String temp  = plan.getTemperature();
+        String holiday = plan.getHoliday();
+        StringBuilder sb = new StringBuilder();
+        sb.append(plan.getDate()).append(" - ").append(plan.getDescription());
+        if (temp != null && !temp.trim().isEmpty()) sb.append("  ").append(temp);
+        if (holiday != null && !holiday.trim().isEmpty()) sb.append("  🎈").append(holiday);
+        tvSub.setText(sb.toString());
+
+        return convertView;
     }
 }

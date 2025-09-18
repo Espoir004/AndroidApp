@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class PlanListActivity extends AppCompatActivity {
+
     private ListView lvPlans;
     private FloatingActionButton fabAdd;
     private Button btnStats;
@@ -29,7 +31,7 @@ public class PlanListActivity extends AppCompatActivity {
     private List<Plan> planList;
     private PlanAdapter adapter;
     private String username;
-    private int userId; // 添加用户ID字段
+    private int userId;
     private Uri avatarUri;
 
     @Override
@@ -37,68 +39,52 @@ public class PlanListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plan_list);
 
-        // 获取传递的数据
         Intent intent = getIntent();
         username = intent.getStringExtra("username");
-        userId = intent.getIntExtra("user_id", -1); // 获取用户ID
+        userId = intent.getIntExtra("user_id", -1);
         String avatarStr = intent.getStringExtra("avatar");
-        if (avatarStr != null) {
-            avatarUri = Uri.parse(avatarStr);
-        }
+        if (avatarStr != null) avatarUri = Uri.parse(avatarStr);
 
-        // 初始化视图
         TextView tvUsername = findViewById(R.id.tvUsername);
         ImageView ivAvatar = findViewById(R.id.ivAvatar);
         lvPlans = findViewById(R.id.lvPlans);
         fabAdd = findViewById(R.id.fabAdd);
         btnStats = findViewById(R.id.btnStats);
 
-        // 设置用户名和头像
         tvUsername.setText(username);
-        if (avatarUri != null) {
-            ivAvatar.setImageURI(avatarUri);
-        }
+        if (avatarUri != null) ivAvatar.setImageURI(avatarUri);
 
-        // 初始化数据库
         dbHelper = new DatabaseHelper(this);
-
-        // 检查用户ID是否有效
         if (userId == -1) {
             Toast.makeText(this, "用户信息错误", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // 加载计划列表
+        // 预加载当前年份的节假日数据
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        HolidayRepo.preloadHolidays(currentYear);
+
         loadPlans();
 
-        // 添加计划按钮点击事件
-        fabAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAddPlanDialog();
-            }
+        fabAdd.setOnClickListener(v -> showAddPlanDialog());
+        btnStats.setOnClickListener(v -> {
+            Intent statsIntent = new Intent(PlanListActivity.this, StatsActivity.class);
+            statsIntent.putExtra("username", username);
+            statsIntent.putExtra("user_id", userId);
+            startActivity(statsIntent);
         });
 
-        // 查看统计按钮点击事件
-        btnStats.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent statsIntent = new Intent(PlanListActivity.this, StatsActivity.class);
-                statsIntent.putExtra("username", username);
-                statsIntent.putExtra("user_id", userId); // 传递用户ID
-                startActivity(statsIntent);
-            }
+        lvPlans.setOnItemClickListener((parent, view, position, id) -> {
+            Plan plan = planList.get(position);
+            showEditPlanDialog(plan);
         });
 
-        // 列表项长按事件（删除）
-        lvPlans.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Plan plan = planList.get(position);
-                showDeleteDialog(plan);
-                return true;
-            }
+        lvPlans.setOnItemLongClickListener((parent, view, position, id) -> {
+            Plan plan = planList.get(position);
+            showDeleteDialog(plan);
+            return true;
         });
     }
 
@@ -108,84 +94,164 @@ public class PlanListActivity extends AppCompatActivity {
         lvPlans.setAdapter(adapter);
     }
 
+    /* -------------------- 添加计划 -------------------- */
     private void showAddPlanDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_add_plan, null);
 
-        final TextView etTitle = view.findViewById(R.id.etTitle);
-        final TextView etDescription = view.findViewById(R.id.etDescription);
-        final TextView tvSelectedDate = view.findViewById(R.id.tvSelectedDate);
+        TextView etTitle = view.findViewById(R.id.etTitle);
+        TextView etDescription = view.findViewById(R.id.etDescription);
+        TextView tvSelectedDate = view.findViewById(R.id.tvSelectedDate);
         Button btnSelectDate = view.findViewById(R.id.btnSelectDate);
         Button btnSave = view.findViewById(R.id.btnSave);
 
-        builder.setView(view);
-        final AlertDialog dialog = builder.create();
-
-        // 设置默认日期为今天
-        final Calendar calendar = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String today = sdf.format(calendar.getTime());
+        String today = sdf.format(cal.getTime());
         tvSelectedDate.setText(today);
         final String[] selectedDate = {today};
 
-        // 日期选择按钮点击事件
-        btnSelectDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 创建日期选择器对话框
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        PlanListActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                                // 月份从0开始，所以需要+1
-                                String formattedDate = String.format(Locale.getDefault(),
-                                        "%04d-%02d-%02d", year, month + 1, dayOfMonth);
-                                tvSelectedDate.setText(formattedDate);
-                                selectedDate[0] = formattedDate;
-                            }
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                );
-
-                datePickerDialog.show();
-            }
+        btnSelectDate.setOnClickListener(v -> {
+            new DatePickerDialog(this, (picker, y, m, d) -> {
+                selectedDate[0] = String.format(Locale.getDefault(), "%04d-%02d-%02d", y, m + 1, d);
+                tvSelectedDate.setText(selectedDate[0]);
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String title = etTitle.getText().toString().trim();
-                String description = etDescription.getText().toString().trim();
-                String date = selectedDate[0];
+        builder.setView(view);
+        AlertDialog dialog = builder.create();
 
-                if (title.isEmpty()) {
-                    Toast.makeText(PlanListActivity.this, "请输入标题", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // 使用当前登录用户的ID
-                Plan plan = new Plan(title, description, date, userId);
-                dbHelper.addPlan(plan);
-                loadPlans();
-                dialog.dismiss();
-                Toast.makeText(PlanListActivity.this, "计划添加成功", Toast.LENGTH_SHORT).show();
+        btnSave.setOnClickListener(v -> {
+            String title = etTitle.getText().toString().trim();
+            String description = etDescription.getText().toString().trim();
+            if (title.isEmpty()) {
+                Toast.makeText(this, "标题不能为空", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            /* ===== 第三方节假日 API 提醒（子线程→主线程）===== */
+            new Thread(() -> {
+                String holiday = HolidayRepo.getName(selectedDate[0]);
+                boolean isHoliday = HolidayRepo.isHoliday(selectedDate[0]);
+                Log.d("Holiday", "date=" + selectedDate[0] + "  holiday=" + holiday + "  isHoliday=" + isHoliday);
+                runOnUiThread(() -> {
+                    if (isHoliday) {   // 非工作日就弹
+                        String msg = holiday.isEmpty() ? "今天是休息日" : "API 返回：今天是 " + holiday;
+                        new AlertDialog.Builder(PlanListActivity.this)
+                                .setTitle("节假日提醒")
+                                .setMessage(msg + "，仍要保存吗？")
+                                .setPositiveButton("仍保存", (d, w) -> {
+                                    doSave(title, description, selectedDate[0], holiday);
+                                    dialog.dismiss();
+                                })
+                                .setNegativeButton("取消", null)
+                                .show();
+                    } else {
+                        // 工作日直接保存
+                        doSave(title, description, selectedDate[0], holiday);
+                        dialog.dismiss();
+                    }
+                });
+            }).start();
         });
 
         dialog.show();
     }
 
-    private void showDeleteDialog(final Plan plan) {
+    /* -------------------- 编辑计划 -------------------- */
+    private void showEditPlanDialog(Plan plan) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_plan, null);
+
+        TextView etTitle = view.findViewById(R.id.etTitle);
+        TextView etDescription = view.findViewById(R.id.etDescription);
+        TextView tvSelectedDate = view.findViewById(R.id.tvSelectedDate);
+        Button btnSelectDate = view.findViewById(R.id.btnSelectDate);
+        Button btnSave = view.findViewById(R.id.btnSave);
+
+        // 回显旧数据
+        etTitle.setText(plan.getTitle());
+        etDescription.setText(plan.getDescription());
+        tvSelectedDate.setText(plan.getDate());
+        final String[] selectedDate = {plan.getDate()};
+
+        btnSelectDate.setOnClickListener(v -> {
+            Calendar c = Calendar.getInstance();
+            new DatePickerDialog(this, (picker, y, m, d) -> {
+                selectedDate[0] = String.format(Locale.getDefault(), "%04d-%02d-%02d", y, m + 1, d);
+                tvSelectedDate.setText(selectedDate[0]);
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        builder.setView(view);
+        AlertDialog dialog = builder.create();
+
+        btnSave.setOnClickListener(v -> {
+            String title = etTitle.getText().toString().trim();
+            String desc = etDescription.getText().toString().trim();
+            if (title.isEmpty()) {
+                Toast.makeText(this, "标题不能为空", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            /* ===== 第三方节假日 API 提醒 ===== */
+            new Thread(() -> {
+                String holiday = HolidayRepo.getName(selectedDate[0]);
+                boolean isHoliday = HolidayRepo.isHoliday(selectedDate[0]);
+                Log.d("Holiday", "date=" + selectedDate[0] + "  holiday=" + holiday + "  isHoliday=" + isHoliday);
+                runOnUiThread(() -> {
+                    if (isHoliday) {
+                        String msg = holiday.isEmpty() ? "今天是休息日" : "API 返回：今天是 " + holiday;
+                        new AlertDialog.Builder(PlanListActivity.this)
+                                .setTitle("节假日提醒")
+                                .setMessage(msg + "，仍要更新吗？")
+                                .setPositiveButton("仍更新", (d, w) -> {
+                                    doUpdate(plan, title, desc, selectedDate[0], holiday);
+                                    dialog.dismiss();
+                                })
+                                .setNegativeButton("取消", null)
+                                .show();
+                    } else {
+                        doUpdate(plan, title, desc, selectedDate[0], holiday);
+                        dialog.dismiss();
+                    }
+                });
+            }).start();
+        });
+
+        dialog.show();
+    }
+
+    /* -------------------- 真正写数据库 -------------------- */
+    private void doSave(String title, String description, String date, String holiday) {
+        Plan plan = new Plan(title, description, date, userId);
+        plan.setHoliday(holiday);
+        plan.setTemperature("--");
+        dbHelper.addPlan(plan);
+        loadPlans();
+        Toast.makeText(this, "已保存", Toast.LENGTH_SHORT).show();
+    }
+
+    private void doUpdate(Plan plan, String title, String description, String date, String holiday) {
+        plan.setTitle(title);
+        plan.setDescription(description);
+        plan.setDate(date);
+        plan.setHoliday(holiday);
+        plan.setTemperature("--");
+        dbHelper.updatePlan(plan);
+        loadPlans();
+        Toast.makeText(this, "已更新", Toast.LENGTH_SHORT).show();
+    }
+
+    /* -------------------- 删除 -------------------- */
+    private void showDeleteDialog(Plan plan) {
         new AlertDialog.Builder(this)
                 .setTitle("删除计划")
                 .setMessage("确定要删除这个计划吗？")
                 .setPositiveButton("删除", (dialog, which) -> {
                     dbHelper.deletePlan(plan.getId());
                     loadPlans();
-                    Toast.makeText(PlanListActivity.this, "计划已删除", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "计划已删除", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("取消", null)
                 .show();

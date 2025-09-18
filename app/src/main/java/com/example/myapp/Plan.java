@@ -6,7 +6,13 @@ public class Plan {
     private String description;
     private String date;
     private int userId;
+    private String temperature;
+    private String holiday;
 
+    public String getTemperature() { return temperature; }
+    public void setTemperature(String t) { this.temperature = t; }
+    public String getHoliday() { return holiday; }
+    public void setHoliday(String h) { this.holiday = h; }
     public Plan() {}
 
     public Plan(String title, String description, String date, int userId) {
